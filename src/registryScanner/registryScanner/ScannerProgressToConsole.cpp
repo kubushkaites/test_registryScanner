@@ -1,6 +1,7 @@
 #include "ScannerProgressToConsole.h"
 
 ScannerProgressToConsole::ScannerProgressToConsole()
+	:IScannerProgress()
 {
 }
 

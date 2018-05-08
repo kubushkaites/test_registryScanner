@@ -1,6 +1,6 @@
 #include "ScannerProgressStrategy.h"
 
-ScannerProgressStrategy::ScannerProgressStrategy(std::list<IScannerProgress> viewersList)
+ScannerProgressStrategy::ScannerProgressStrategy(std::list<IScannerProgressSharedPtr> viewersList)
 	:mViewersList(viewersList)
 {
 }
@@ -9,7 +9,7 @@ void ScannerProgressStrategy::updateDataToShow(uint32_t scannedKeys, uint32_t re
 {
 	for (auto& item : mViewersList)
 	{
-		item.updateDataToShow(scannedKeys, remainedKeys);
+		item->updateDataToShow(scannedKeys, remainedKeys);
 	}
 }
 
@@ -17,11 +17,11 @@ void ScannerProgressStrategy::showSearchResult(uint32_t foundKeys)
 {
 	for (auto& item : mViewersList)
 	{
-		item.showSearchResult(foundKeys);
+		item->showSearchResult(foundKeys);
 	}
 }
 
-void ScannerProgressStrategy::addProgressViewer(const IScannerProgress & viewer)
+void ScannerProgressStrategy::addProgressViewer(const IScannerProgressSharedPtr viewer)
 {
 	mViewersList.push_back(viewer);
 }

@@ -2,7 +2,7 @@
 
 #include "IScanningResultObserver.h"
 
-class BaseLogger : public IScannintResultObserver
+class BaseLogger : public IScanningResultObserver
 {
 public:
 	BaseLogger(IScannerSharedPtr observedScanner);

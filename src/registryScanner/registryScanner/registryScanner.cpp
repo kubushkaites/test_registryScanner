@@ -3,13 +3,32 @@
 
 #include "stdafx.h"
 #include "ScannerFactory.h"
-#include "ScannerProgressProcessorStrategy.h"
+#include "ScannerProgressStrategy.h"
+#include "ScannerRingZero.h"
+#include "ScannerRingThree.h"
+#include "LoggerToFile.h"
 
 int main()
 {
-	std::shared_ptr<IScannerAbstractFactory> factoryPtr(new ScannerFactory);
-	std::shared_ptr<IScanner> scanner0Ptr(factoryPtr->createScannerRingZero(L"sss"));
-	std::shared_ptr<IScanner> scanner3Ptr(factoryPtr->createScannerRingThree(L"sss"));
+	std::shared_ptr<IScannerAbstractFactory> factoryPtr(new ScannerFactory());
+
+	std::shared_ptr<IScanner> scannerRingZeroPtr(factoryPtr->createScannerRingZero(L"sss"));
+	std::shared_ptr<IScanner> scannerRingThreePtr(factoryPtr->createScannerRingThree(L"HKLM"));
+		
+	std::list<IScannerProgressSharedPtr> scannerProgressList{ IScannerProgressSharedPtr(new ScannerProgressToConsole()) };//class logs percentage and show result of how many keys found
+	std::shared_ptr<ScannerProgressStrategy> scannerProgressStrategy(new ScannerProgressStrategy(scannerProgressList));
+
+	scannerRingZeroPtr->setScanningProgressStrategy(scannerProgressStrategy);//add to strategy identifiers to know from what class info received;
+	scannerRingThreePtr->setScanningProgressStrategy(scannerProgressStrategy);
+
+	std::shared_ptr<IScanningResultObserver> loggerToFileRingZero(new LoggerToFile(scannerRingZeroPtr));//set observed classes for loggers
+	std::shared_ptr<IScanningResultObserver> loggerToFileRingThree(new LoggerToFile(scannerRingThreePtr));
+
+	scannerRingZeroPtr->addScannerObserver(loggerToFileRingZero);//set observers for scanners
+	scannerRingThreePtr->addScannerObserver(loggerToFileRingThree);
+
+	scannerRingThreePtr->startScanning();
+
     return 0;
 }
 

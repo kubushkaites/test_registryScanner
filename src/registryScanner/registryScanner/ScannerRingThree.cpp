@@ -1,8 +1,10 @@
 #include "ScannerRingThree.h"
 #include "LoggerToFile.h"
+#include "ScannerProgressStrategy.h"
 
 ScannerRingThree::ScannerRingThree(std::wstring scanningStartPath)
-	:mScanningStartPath(scanningStartPath)
+	:IScanner(),
+	mScanningStartPath(scanningStartPath)
 {
 }
 
@@ -21,9 +23,14 @@ void ScannerRingThree::changeScanningStartPath(std::wstring scanningStartPath)
 	startScanning();
 }
 
-void ScannerRingThree::addScannerObserver(ScanningResultObserverSharedPtr scannerObserver)
+void ScannerRingThree::addScannerObserver(IScanningResultObserverSharedPtr scannerObserver)
 {
 	mScannerObservers.push_back(scannerObserver);
+}
+
+void ScannerRingThree::setScanningProgressStrategy(ScannerProgressStrategySharedPtr scannerProgressStrategy)
+{
+	mScannerProgressStrategy = scannerProgressStrategy;
 }
 
 void ScannerRingThree::notifyOnNewScanningResultReceived()
