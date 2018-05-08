@@ -1,0 +1,84 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hh;hpp;hxx;hm;inl;inc;xsd</Extensions>
+    </Filter>
+    <Filter Include="Resource Files">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    </Filter>
+    <Filter Include="ScannersFactory">
+      <UniqueIdentifier>{30656e79-130a-4e4d-ba6f-05ab362772d8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Scanners">
+      <UniqueIdentifier>{7fa5ea3f-5108-4e3a-95a7-d7ccc0a16320}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Loggers">
+      <UniqueIdentifier>{9c4d05a9-9554-4e0b-a4f7-d02d85140a7c}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="ReadMe.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="stdafx.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="targetver.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ScannerFactory.h">
+      <Filter>ScannersFactory</Filter>
+    </ClInclude>
+    <ClInclude Include="IScanner.h">
+      <Filter>Scanners</Filter>
+    </ClInclude>
+    <ClInclude Include="IScannerAbstractFactory.h">
+      <Filter>ScannersFactory</Filter>
+    </ClInclude>
+    <ClInclude Include="ScannerRingThree.h">
+      <Filter>Scanners</Filter>
+    </ClInclude>
+    <ClInclude Include="ScannerRingZero.h">
+      <Filter>Scanners</Filter>
+    </ClInclude>
+    <ClInclude Include="IScanningResultObserver.h">
+      <Filter>Loggers</Filter>
+    </ClInclude>
+    <ClInclude Include="BaseLogger.h">
+      <Filter>Loggers</Filter>
+    </ClInclude>
+    <ClInclude Include="LoggerToFile.h">
+      <Filter>Loggers</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="stdafx.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="registryScanner.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="ScannerFactory.cpp">
+      <Filter>ScannersFactory</Filter>
+    </ClCompile>
+    <ClCompile Include="ScannerRingThree.cpp">
+      <Filter>Scanners</Filter>
+    </ClCompile>
+    <ClCompile Include="ScannerRingZero.cpp">
+      <Filter>Scanners</Filter>
+    </ClCompile>
+    <ClCompile Include="BaseLogger.cpp">
+      <Filter>Loggers</Filter>
+    </ClCompile>
+    <ClCompile Include="LoggerToFile.cpp">
+      <Filter>Loggers</Filter>
+    </ClCompile>
+  </ItemGroup>
+</Project>
