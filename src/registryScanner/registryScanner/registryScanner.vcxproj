@@ -148,9 +148,12 @@
     <ClInclude Include="BaseLogger.h" />
     <ClInclude Include="IScanner.h" />
     <ClInclude Include="IScannerAbstractFactory.h" />
+    <ClInclude Include="IScannerProgress.h" />
     <ClInclude Include="IScanningResultObserver.h" />
     <ClInclude Include="LoggerToFile.h" />
     <ClInclude Include="ScannerFactory.h" />
+    <ClInclude Include="ScannerProgressToConsole.h" />
+    <ClInclude Include="ScannerProgressStrategy.h" />
     <ClInclude Include="ScannerRingThree.h" />
     <ClInclude Include="ScannerRingZero.h" />
     <ClInclude Include="stdafx.h" />
@@ -161,8 +164,10 @@
     <ClCompile Include="LoggerToFile.cpp" />
     <ClCompile Include="registryScanner.cpp" />
     <ClCompile Include="ScannerFactory.cpp" />
+    <ClCompile Include="ScannerProgressStrategy.cpp" />
     <ClCompile Include="ScannerRingThree.cpp" />
     <ClCompile Include="ScannerRingZero.cpp" />
+    <ClCompile Include="ScannerProgressToConsole.cpp" />
     <ClCompile Include="stdafx.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

@@ -22,6 +22,12 @@
     <Filter Include="Loggers">
       <UniqueIdentifier>{9c4d05a9-9554-4e0b-a4f7-d02d85140a7c}</UniqueIdentifier>
     </Filter>
+    <Filter Include="InputController">
+      <UniqueIdentifier>{df155c51-0368-4626-abfb-0380a05e13d5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ScanningProgressViewer">
+      <UniqueIdentifier>{afb236f6-f11c-4a78-b957-e6ddaf507546}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <Text Include="ReadMe.txt" />
@@ -57,6 +63,15 @@
     <ClInclude Include="LoggerToFile.h">
       <Filter>Loggers</Filter>
     </ClInclude>
+    <ClInclude Include="IScannerProgress.h">
+      <Filter>ScanningProgressViewer</Filter>
+    </ClInclude>
+    <ClInclude Include="ScannerProgressToConsole.h">
+      <Filter>ScanningProgressViewer</Filter>
+    </ClInclude>
+    <ClInclude Include="ScannerProgressStrategy.h">
+      <Filter>ScanningProgressViewer</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -79,6 +94,12 @@
     </ClCompile>
     <ClCompile Include="LoggerToFile.cpp">
       <Filter>Loggers</Filter>
+    </ClCompile>
+    <ClCompile Include="ScannerProgressToConsole.cpp">
+      <Filter>ScanningProgressViewer</Filter>
+    </ClCompile>
+    <ClCompile Include="ScannerProgressStrategy.cpp">
+      <Filter>ScanningProgressViewer</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

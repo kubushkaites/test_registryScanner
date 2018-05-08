@@ -3,6 +3,7 @@
 
 #include "stdafx.h"
 #include "ScannerFactory.h"
+#include "ScannerProgressProcessorStrategy.h"
 
 int main()
 {

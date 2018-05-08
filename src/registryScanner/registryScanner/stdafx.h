@@ -22,6 +22,7 @@
 #include <stdio.h>
 #include <tchar.h>
 #include <windows.h>
+#include <stdint.h>
 #include <string>
 #include <list>
 #include <vector>
