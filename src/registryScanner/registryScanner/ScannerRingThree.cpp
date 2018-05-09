@@ -9,10 +9,15 @@ ScannerRingThree::ScannerRingThree(const std::wstring& scanningStartPath, const 
 	mFoundKey(L""),
 	mFoundPath(L"")
 {
+	//auto totalAmountOfKeysFunc = std::bind(&ScannerRingThree::countTotalAmountOfKeys, this);
+	//mCountTotalAmountOfKeysTask = std::async(totalAmountOfKeysFunc);
+
 }
 
 void ScannerRingThree::startScanning()
 {
+	std::wcout << "Start scanning path: " << mScanningStartPath << std::endl;
+
 	HKEY hKey;
 
 	const int MAX_KEY_LENGTH = 255;
@@ -60,6 +65,8 @@ void ScannerRingThree::startScanning()
 		createThreads(hKey, cSubKeys);
 	}
 	RegCloseKey(hKey);
+
+	mScannerProgressStrategy->searchEnded(mMatchingKeys);
 }
 
 void ScannerRingThree::createThreads(HKEY hKey, DWORD cSubKeys)
@@ -154,11 +161,22 @@ void ScannerRingThree::scan(HKEY hKey, DWORD regEnumIteratorStartPos, DWORD regE
 	{
 		enumIteratorStartPos = regEnumIteratorStartPos;
 		enumIteratorEndPos = regEnumIteratorEndPos;
+
+		mCountingMutex.lock();
+		if (mTotalAmountOfKeys == 0)//to avoid adding the same value two times
+		{
+			mTotalAmountOfKeys += cSubKeys;
+		}
+		mCountingMutex.unlock();
 	}
 	else if (isInitialCall == false)
 	{
 		enumIteratorStartPos = 0;
 		enumIteratorEndPos = cSubKeys;
+
+		mCountingMutex.lock();
+		mTotalAmountOfKeys += cSubKeys;
+		mCountingMutex.unlock();
 	}
 
 	if (cSubKeys)
@@ -185,8 +203,17 @@ void ScannerRingThree::scan(HKEY hKey, DWORD regEnumIteratorStartPos, DWORD regE
 
 				notifyOnNewScanningResultReceived();
 
+				++mMatchingKeys;
+
 				mNotifyingMutex.unlock();
 			}
+
+			mCountingMutex.lock();
+				++mScannedAmountOfKeys;
+			mCountingMutex.unlock();
+
+			//update percentage of progress
+			mScannerProgressStrategy->updateDataToShow(mScannedAmountOfKeys, mTotalAmountOfKeys);
 
 			mSubkeysPath[std::this_thread::get_id()] += L"\\" + keyName;
 			
@@ -200,7 +227,7 @@ void ScannerRingThree::scan(HKEY hKey, DWORD regEnumIteratorStartPos, DWORD regE
 					&additionalKey) == ERROR_SUCCESS
 					)
 				{
-					_tprintf(TEXT("(%d) %s\n"), enumIteratorStartPos + 1, mSubkeysPath[std::this_thread::get_id()].c_str());
+					/*_tprintf(TEXT("(%d) %s\n"), enumIteratorStartPos + 1, mSubkeysPath[std::this_thread::get_id()].c_str());*/
 					
 					scan(additionalKey, enumIteratorStartPos, enumIteratorEndPos);
 					RegCloseKey(additionalKey);
@@ -228,6 +255,14 @@ bool ScannerRingThree::searchForMatching(const std::wstring& key)
 	}
 }
 
+void ScannerRingThree::checkScanningPathAndTruncateIfNeeded()
+{
+	std::size_t found = mScanningStartPath.find(L"HKLM\\");
+	if (found != std::string::npos)
+	{
+
+	}
+}
 
 void ScannerRingThree::stopScanning()
 {

@@ -5,17 +5,17 @@
 LoggerToFile::LoggerToFile(IScannerSharedPtr observedScanner)
 	:BaseLogger(observedScanner)
 {
-	logFile.open("..\\PathsAndKeys.txt", std::fstream::app);
+	logFile.open("..\\PathsAndKeys.txt", std::fstream::out);
 }
 
 void LoggerToFile::onNewScanningResultReceived()
 {
 	mWriteToFileMutex.lock();
 
-	std::cout << "LoggerToFile::NEW SCANNING RESULT RECEIVED!!!" << std::endl;
+	/*std::cout << "LoggerToFile::NEW SCANNING RESULT RECEIVED!!!" << std::endl;
 
 	std::wcout<<"Found Key: "<<getScanner()->getFoundKey()<<std::endl;
-	std::wcout << "Found Key registry path: " << getScanner()->getFoundKeyPath() << std::endl;
+	std::wcout << "Found Key registry path: " << getScanner()->getFoundKeyPath() << std::endl;*/
 
 	std::wstring writeToFile = getScanner()->getFoundKeyPath() + L" | " + getScanner()->getFoundKey();
 

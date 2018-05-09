@@ -3,21 +3,47 @@
 ScannerProgressToConsole::ScannerProgressToConsole()
 	:IScannerProgress()
 {
+	auto func = std::bind(&ScannerProgressToConsole::showProgress, this);
+	mShowPercentsThr = std::thread(func);
+	mShowPercentsThr.detach();
 }
 
-void ScannerProgressToConsole::updateDataToShow(uint32_t scannedKeys, uint32_t remainedKeys)
+void ScannerProgressToConsole::updateDataToShow(uint64_t scannedKeys, uint64_t totalAmountOfKeys)
 {
-	uint32_t allCountOfKeys = scannedKeys + remainedKeys;
-	double percentOfSuccess = (static_cast<double>(scannedKeys) / allCountOfKeys) * 100;
-	showProgress(percentOfSuccess);
+	mPercentsVarMutex.lock();
+	mPercentOfSuccess = (static_cast<double>(scannedKeys) / totalAmountOfKeys) * 100;	
+	mPercentsVarMutex.unlock();
 }
 
-void ScannerProgressToConsole::showSearchResult(uint32_t foundKeys)
+void ScannerProgressToConsole::searchEnded(uint64_t foundKeys)
 {
-	std::cout << "Search operation ended, keys found : " << foundKeys << std::endl;
+	mWriteToConsoleMutex.lock();
+
+	mPercentOfSuccess = 100;
+	system("cls");
+	std::cout << "Search ended. Amount of keys found : " << foundKeys << std::endl;
+	
+	mWriteToConsoleMutex.unlock();
 }
 
-void ScannerProgressToConsole::showProgress(double percents)
-{
-	std::cout << "Current scanning progress : " << percents << std::endl;
+void ScannerProgressToConsole::showProgress()
+{	
+	while (true) 
+	{
+		mWriteToConsoleMutex.lock();
+
+		if (mPercentOfSuccess != 100)
+		{
+			system("cls");
+			std::cout << "Current percentage : " << mPercentOfSuccess << " % " << std::endl;
+		}
+		else
+		{
+			return;
+		}
+		mWriteToConsoleMutex.unlock();
+		
+		Sleep(50);
+	}
 }
+

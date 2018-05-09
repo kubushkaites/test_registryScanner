@@ -30,8 +30,9 @@
 #include <memory>
 #include <algorithm>
 #include <map>
-#include <functional>
 #include <future>
+#include <thread>
+#include <functional>
 #include <fstream>
 
 #pragma warning(pop) //For /Wall

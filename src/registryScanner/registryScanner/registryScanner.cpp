@@ -18,8 +18,6 @@ int main()
 	std::cout << "Enter HKLM registry search path(with empty path HKLM key search will be started from HKLM root)" << std::endl;
 	std::getline(std::wcin, searchPath);
 
-	
-
 	std::shared_ptr<IScannerAbstractFactory> factoryPtr(new ScannerFactory());
 
 	std::shared_ptr<IScanner> scannerRingZeroPtr(factoryPtr->createScannerRingZero(L"sss"));

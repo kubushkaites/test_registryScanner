@@ -6,7 +6,6 @@
 ScannerFactory::ScannerFactory()
 	:IScannerAbstractFactory()
 {
-	std::cout << "ScannerFactory()" << std::endl;
 }
 
 IScannerSharedPtr ScannerFactory::createScannerRingZero(const std::wstring& scanningStartPath, const std::wstring& searchPattern)

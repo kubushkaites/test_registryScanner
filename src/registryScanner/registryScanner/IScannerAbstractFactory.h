@@ -9,8 +9,8 @@ typedef std::shared_ptr<IScanner> IScannerSharedPtr;
 class IScannerAbstractFactory
 {
 public:
-	IScannerAbstractFactory() { std::cout << "IScannerAbstractFactory()" << std::endl; }
+	IScannerAbstractFactory() {}
 	virtual IScannerSharedPtr createScannerRingZero(const std::wstring& scanningStartPath, const std::wstring& searchPattern = L"") = 0;
 	virtual IScannerSharedPtr createScannerRingThree(const std::wstring& scanningStartPath, const std::wstring& searchPattern = L"") = 0;
-	virtual ~IScannerAbstractFactory() { std::cout << "~IScannerAbstractFactory()" << std::endl; }
+	virtual ~IScannerAbstractFactory() {}
 };

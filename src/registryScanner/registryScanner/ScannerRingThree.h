@@ -18,17 +18,27 @@ public:
 protected:
 	virtual void scan(HKEY hKey, DWORD regEnumIteratorStartPos, DWORD regEnumIteratorEndPos, bool isInitialCall = false) override;
 	virtual void createThreads(HKEY hKey, DWORD cSubKeys) override;
+private:
 	bool searchForMatching(const std::wstring& key);
+	void checkScanningPathAndTruncateIfNeeded();
 private:
 	std::mutex mNotifyingMutex;
+	std::mutex mCountingMutex;
 
-	std::wstring mScanningStartPath;	
+	std::wstring mScanningStartPath;
+	//std::wstring mScanningStartPathForCountKeys;
 	std::wstring mSearchPattern;
 	
 	std::wstring mFoundKey;
 	std::wstring mFoundPath;
 
+	std::future<void> mCountTotalAmountOfKeysTask;
+
 	std::map<std::thread::id, std::wstring> mSubkeysPath;
+
+	uint64_t mScannedAmountOfKeys = 0;
+	uint64_t mMatchingKeys = 0;
+	uint64_t mTotalAmountOfKeys = 0;
 
 	ScannerProgressStrategySharedPtr mScannerProgressStrategy;
 	std::list<IScanningResultObserverSharedPtr> mScannerObservers;

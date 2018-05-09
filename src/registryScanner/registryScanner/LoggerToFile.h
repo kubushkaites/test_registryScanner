@@ -13,4 +13,5 @@ protected:
 private:
 	std::wfstream logFile;
 	std::mutex mWriteToFileMutex;
+
 };
