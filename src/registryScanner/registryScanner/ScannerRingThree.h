@@ -17,7 +17,7 @@ protected:
 	virtual void scan(HKEY hKey, DWORD regEnumIteratorStartPos, DWORD regEnumIteratorEndPos, bool isInitialCall = false) override;
 	virtual void createThreads(HKEY hKey, DWORD cSubKeys) override;
 private:
-	bool useTwoThreads;
+
 	std::wstring mScanningStartPath;	
 	std::wstring mSearchPattern;
 

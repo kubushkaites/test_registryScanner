@@ -52,17 +52,18 @@ void ScannerRingThree::startScanning()
 			&cbSecurityDescriptor,   // security descriptor 
 			&ftLastWriteTime);       // last write time 
 	}
-	std::cout << "sucbkeys start scan: " << cSubKeys << std::endl;
+	std::cout << "subkeys start amount: " << cSubKeys << std::endl;
 	if (cSubKeys)
 	{
 		createThreads(hKey, cSubKeys);
 	}
+	RegCloseKey(hKey);
 }
 
 void ScannerRingThree::createThreads(HKEY hKey, DWORD cSubKeys)
 {
 	DWORD enumeratorStep;
-
+	bool useTwoThreads;
 
 	if (cSubKeys / 2)
 	{
@@ -126,8 +127,6 @@ void ScannerRingThree::scan(HKEY hKey, DWORD regEnumIteratorStartPos, DWORD regE
 	DWORD    cbMaxValueData;       // longest value data 
 	DWORD    cbSecurityDescriptor; // size of security descriptor 
 	FILETIME ftLastWriteTime;      // last write time 
-
-
 	
 	DWORD retCode;
 
@@ -158,11 +157,9 @@ void ScannerRingThree::scan(HKEY hKey, DWORD regEnumIteratorStartPos, DWORD regE
 		enumIteratorStartPos = 0;
 		enumIteratorEndPos = cSubKeys;
 	}
-	std::wcout << "this thread : " << mSubkeysPath[std::this_thread::get_id()] << std::endl;
 
 	if (cSubKeys)
 	{
-		//printf("\nNumber of subkeys: %d\n", cSubKeys);
 		for (;enumIteratorStartPos < enumIteratorEndPos; enumIteratorStartPos++)
 		{
 			cbName = MAX_KEY_LENGTH;
@@ -186,15 +183,13 @@ void ScannerRingThree::scan(HKEY hKey, DWORD regEnumIteratorStartPos, DWORD regE
 					&additionalKey) == ERROR_SUCCESS
 					)
 				{
-
 					_tprintf(TEXT("(%d) %s\n"), enumIteratorStartPos + 1, mSubkeysPath[std::this_thread::get_id()].c_str());
 					scan(additionalKey, enumIteratorStartPos, enumIteratorEndPos);
-					
+					RegCloseKey(additionalKey);
 					std::size_t found = mSubkeysPath[std::this_thread::get_id()].rfind(L"\\");
-					if (found != std::string::npos)
+					if (found != std::string::npos)//restore string after recurse
 					{
 						mSubkeysPath[std::this_thread::get_id()].erase(found, mSubkeysPath[std::this_thread::get_id()].length() - found + 1);
-						std::wcout << L"start restored: " << mSubkeysPath[std::this_thread::get_id()] << std::endl;
 					}
 				}
 			}
