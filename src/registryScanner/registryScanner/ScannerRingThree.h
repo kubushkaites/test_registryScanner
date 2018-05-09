@@ -14,11 +14,15 @@ public:
 	virtual void notifyOnNewScanningResultReceived() override;
 	virtual ~ScannerRingThree() {}
 protected:
-	virtual void scan(HKEY hKey, DWORD regEnumIteratorStartPos, DWORD regEnumIteratorEndPos) override;
+	virtual void scan(HKEY hKey, DWORD regEnumIteratorStartPos, DWORD regEnumIteratorEndPos, bool isInitialCall = false) override;
 	virtual void createThreads(HKEY hKey, DWORD cSubKeys) override;
 private:
-	std::wstring mScanningStartPath;
+	bool useTwoThreads;
+	std::wstring mScanningStartPath;	
 	std::wstring mSearchPattern;
+
+	std::map<std::thread::id, std::wstring> mSubkeysPath;
+
 	ScannerProgressStrategySharedPtr mScannerProgressStrategy;
 	std::list<IScanningResultObserverSharedPtr> mScannerObservers;
 };

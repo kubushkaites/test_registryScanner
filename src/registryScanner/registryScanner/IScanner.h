@@ -20,6 +20,6 @@ public:
 	virtual void notifyOnNewScanningResultReceived() = 0;
 	virtual ~IScanner() {}
 protected:
-	virtual void scan(HKEY hKey,DWORD regEnumIteratorStartPos, DWORD regEnumIteratorEndPos) = 0;
-	virtual void createThreads(HKEY hKey, DWORD cSubKeys) = 0;
+	virtual void scan(HKEY hKey, DWORD regEnumIteratorStartPos, DWORD regEnumIteratorEndPos, bool isInitialCall = false) = 0;
+	virtual void createThreads(HKEY hKey, DWORD cSubKeys) = 0 ;
 };

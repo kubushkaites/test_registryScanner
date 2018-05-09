@@ -29,6 +29,7 @@
 #include <iostream>
 #include <memory>
 #include <algorithm>
+#include <map>
 #include <functional>
 #include <future>
 #include <fstream>

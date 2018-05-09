@@ -15,7 +15,7 @@ void ScannerRingZero::startScanning()
 }
 
 
-void ScannerRingZero::scan(HKEY hKey, DWORD regEnumIteratorStartPos, DWORD regEnumIteratorEndPos)
+void ScannerRingZero::scan(HKEY hKey, DWORD regEnumIteratorStartPos, DWORD regEnumIteratorEndPos, bool isInitialCall)
 {
 }
 
