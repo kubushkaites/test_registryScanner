@@ -9,12 +9,12 @@ ScannerFactory::ScannerFactory()
 	std::cout << "ScannerFactory()" << std::endl;
 }
 
-IScannerSharedPtr ScannerFactory::createScannerRingZero(std::wstring scanningStartPath)
+IScannerSharedPtr ScannerFactory::createScannerRingZero(const std::wstring& scanningStartPath, const std::wstring& searchPattern)
 {
-	return IScannerSharedPtr(new ScannerRingZero(scanningStartPath));
+	return IScannerSharedPtr(new ScannerRingZero(scanningStartPath, searchPattern));
 }
 
-IScannerSharedPtr ScannerFactory::createScannerRingThree(std::wstring scanningStartPath)
+IScannerSharedPtr ScannerFactory::createScannerRingThree(const std::wstring& scanningStartPath, const std::wstring& searchPattern)
 {
-	return IScannerSharedPtr(new ScannerRingThree(scanningStartPath));
+	return IScannerSharedPtr(new ScannerRingThree(scanningStartPath, searchPattern));
 }

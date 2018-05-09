@@ -2,10 +2,12 @@
 #include "LoggerToFile.h"
 #include "ScannerProgressStrategy.h"
 
-ScannerRingThree::ScannerRingThree(std::wstring scanningStartPath, std::wstring searchPattern)
+ScannerRingThree::ScannerRingThree(const std::wstring& scanningStartPath, const std::wstring& searchPattern)
 	:IScanner(),
 	mScanningStartPath(scanningStartPath),
-	mSearchPattern(searchPattern)
+	mSearchPattern(searchPattern),
+	mFoundKey(L""),
+	mFoundPath(L"")
 {
 }
 
@@ -110,6 +112,7 @@ void ScannerRingThree::createThreads(HKEY hKey, DWORD cSubKeys)
 	}
 }
 
+
 void ScannerRingThree::scan(HKEY hKey, DWORD regEnumIteratorStartPos, DWORD regEnumIteratorEndPos, bool isInitialCall)
 {
 	const int MAX_KEY_LENGTH = 255;
@@ -170,8 +173,22 @@ void ScannerRingThree::scan(HKEY hKey, DWORD regEnumIteratorStartPos, DWORD regE
 				NULL,
 				NULL,
 				&ftLastWriteTime);
-			
-			mSubkeysPath[std::this_thread::get_id()] += L"\\" + std::wstring(achKey);
+
+			std::wstring keyName(achKey);
+
+			if (bool isMatching = searchForMatching(keyName))
+			{
+				mNotifyingMutex.lock();
+
+				mFoundKey = keyName;
+				mFoundPath = mSubkeysPath[std::this_thread::get_id()];
+
+				notifyOnNewScanningResultReceived();
+
+				mNotifyingMutex.unlock();
+			}
+
+			mSubkeysPath[std::this_thread::get_id()] += L"\\" + keyName;
 			
 			if (retCode == ERROR_SUCCESS)
 			{
@@ -184,6 +201,7 @@ void ScannerRingThree::scan(HKEY hKey, DWORD regEnumIteratorStartPos, DWORD regE
 					)
 				{
 					_tprintf(TEXT("(%d) %s\n"), enumIteratorStartPos + 1, mSubkeysPath[std::this_thread::get_id()].c_str());
+					
 					scan(additionalKey, enumIteratorStartPos, enumIteratorEndPos);
 					RegCloseKey(additionalKey);
 					std::size_t found = mSubkeysPath[std::this_thread::get_id()].rfind(L"\\");
@@ -197,7 +215,18 @@ void ScannerRingThree::scan(HKEY hKey, DWORD regEnumIteratorStartPos, DWORD regE
 	}
 }
 
-
+bool ScannerRingThree::searchForMatching(const std::wstring& key)
+{
+	std::size_t found = key.find(mSearchPattern);
+	if (found != std::string::npos)
+	{
+		return true;
+	}
+	else
+	{
+		return false;
+	}
+}
 
 
 void ScannerRingThree::stopScanning()
@@ -225,6 +254,16 @@ void ScannerRingThree::notifyOnNewScanningResultReceived()
 {
 	for (auto& observer : mScannerObservers)
 	{
-
+		observer->onNewScanningResultReceived();
 	}
+}
+
+std::wstring ScannerRingThree::getFoundKey() const
+{
+	return mFoundKey;
+}
+
+std::wstring ScannerRingThree::getFoundKeyPath() const
+{
+	return mFoundPath;
 }

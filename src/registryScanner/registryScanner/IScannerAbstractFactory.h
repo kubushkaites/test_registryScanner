@@ -10,7 +10,7 @@ class IScannerAbstractFactory
 {
 public:
 	IScannerAbstractFactory() { std::cout << "IScannerAbstractFactory()" << std::endl; }
-	virtual IScannerSharedPtr createScannerRingZero(std::wstring scanningStartPath) = 0;
-	virtual IScannerSharedPtr createScannerRingThree(std::wstring scanningStartPath) = 0;
+	virtual IScannerSharedPtr createScannerRingZero(const std::wstring& scanningStartPath, const std::wstring& searchPattern = L"") = 0;
+	virtual IScannerSharedPtr createScannerRingThree(const std::wstring& scanningStartPath, const std::wstring& searchPattern = L"") = 0;
 	virtual ~IScannerAbstractFactory() { std::cout << "~IScannerAbstractFactory()" << std::endl; }
 };

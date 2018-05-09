@@ -10,10 +10,20 @@
 
 int main()
 {
+	std::wstring keyToSearch;
+	std::cout << "Enter HKLM registry key to search: " << std::endl;
+	std::getline(std::wcin, keyToSearch);
+
+	std::wstring searchPath;
+	std::cout << "Enter HKLM registry search path(with empty path HKLM key search will be started from HKLM root)" << std::endl;
+	std::getline(std::wcin, searchPath);
+
+	
+
 	std::shared_ptr<IScannerAbstractFactory> factoryPtr(new ScannerFactory());
 
 	std::shared_ptr<IScanner> scannerRingZeroPtr(factoryPtr->createScannerRingZero(L"sss"));
-	std::shared_ptr<IScanner> scannerRingThreePtr(factoryPtr->createScannerRingThree(L"HARDWARE"));
+	std::shared_ptr<IScanner> scannerRingThreePtr(factoryPtr->createScannerRingThree(searchPath, keyToSearch));
 		
 	std::list<IScannerProgressSharedPtr> scannerProgressList{ IScannerProgressSharedPtr(new ScannerProgressToConsole()) };//scanner progress list contains receivers of information 
 																														//about percentage of success of scanning process and info about how many keys were found

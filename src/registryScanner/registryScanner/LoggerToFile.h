@@ -9,5 +9,8 @@ public:
 	virtual ~LoggerToFile() {}
 	virtual void onNewScanningResultReceived();
 protected:
-	virtual void writeLog(std::wstring log) override;
+	virtual void writeLog(const std::wstring& log) override;
+private:
+	std::wfstream logFile;
+	std::mutex mWriteToFileMutex;
 };

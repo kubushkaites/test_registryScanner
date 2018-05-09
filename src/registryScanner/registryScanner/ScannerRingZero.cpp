@@ -2,7 +2,7 @@
 #include "LoggerToFile.h"
 #include "ScannerProgressStrategy.h"
 
-ScannerRingZero::ScannerRingZero(std::wstring scanningStartPath, std::wstring searchPattern)
+ScannerRingZero::ScannerRingZero(const std::wstring& scanningStartPath, const std::wstring& searchPattern)
 	:IScanner(),
 	mScanningStartPath(scanningStartPath),
 	mSearchPattern(searchPattern)
@@ -51,4 +51,14 @@ void ScannerRingZero::notifyOnNewScanningResultReceived()
 	{
 		
 	}
+}
+
+std::wstring ScannerRingZero::getFoundKey() const
+{
+	return std::wstring();
+}
+
+std::wstring ScannerRingZero::getFoundKeyPath() const
+{
+	return std::wstring();
 }

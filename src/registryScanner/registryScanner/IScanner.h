@@ -18,6 +18,8 @@ public:
 	virtual void addScannerObserver(IScanningResultObserverSharedPtr scannerObserver) = 0;
 	virtual void setScanningProgressStrategy(ScannerProgressStrategySharedPtr) = 0;
 	virtual void notifyOnNewScanningResultReceived() = 0;
+	virtual std::wstring getFoundKey() const = 0;
+	virtual std::wstring getFoundKeyPath() const = 0;
 	virtual ~IScanner() {}
 protected:
 	virtual void scan(HKEY hKey, DWORD regEnumIteratorStartPos, DWORD regEnumIteratorEndPos, bool isInitialCall = false) = 0;
