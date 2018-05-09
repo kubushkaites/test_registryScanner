@@ -17,16 +17,16 @@ public:
 	virtual ~ScannerRingThree() {}
 protected:
 	virtual void scan(HKEY hKey, DWORD regEnumIteratorStartPos, DWORD regEnumIteratorEndPos, bool isInitialCall = false) override;
-	virtual void createThreads(HKEY hKey, DWORD cSubKeys) override;
+	virtual void createWorkerThreads(HKEY hKey, DWORD cSubKeys) override;
 private:
 	bool searchForMatching(const std::wstring& key);
-	void checkScanningPathAndTruncateIfNeeded();
+	void restorePreviousPathState();
+	void checkStartScanningPathAndTruncateIfNeeded();
 private:
 	std::mutex mNotifyingMutex;
 	std::mutex mCountingMutex;
 
 	std::wstring mScanningStartPath;
-	//std::wstring mScanningStartPathForCountKeys;
 	std::wstring mSearchPattern;
 	
 	std::wstring mFoundKey;

@@ -19,7 +19,7 @@ void ScannerRingZero::scan(HKEY hKey, DWORD regEnumIteratorStartPos, DWORD regEn
 {
 }
 
-void ScannerRingZero::createThreads(HKEY hKey, DWORD cSubKeys)
+void ScannerRingZero::createWorkerThreads(HKEY hKey, DWORD cSubKeys)
 {
 }
 

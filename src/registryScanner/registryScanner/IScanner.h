@@ -23,5 +23,5 @@ public:
 	virtual ~IScanner() {}
 protected:
 	virtual void scan(HKEY hKey, DWORD regEnumIteratorStartPos, DWORD regEnumIteratorEndPos, bool isInitialCall = false) = 0;
-	virtual void createThreads(HKEY hKey, DWORD cSubKeys) = 0 ;
+	virtual void createWorkerThreads(HKEY hKey, DWORD cSubKeys) = 0 ;
 };

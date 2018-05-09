@@ -9,15 +9,13 @@ ScannerRingThree::ScannerRingThree(const std::wstring& scanningStartPath, const 
 	mFoundKey(L""),
 	mFoundPath(L"")
 {
+	checkStartScanningPathAndTruncateIfNeeded();
 	//auto totalAmountOfKeysFunc = std::bind(&ScannerRingThree::countTotalAmountOfKeys, this);
 	//mCountTotalAmountOfKeysTask = std::async(totalAmountOfKeysFunc);
-
 }
 
 void ScannerRingThree::startScanning()
 {
-	std::wcout << "Start scanning path: " << mScanningStartPath << std::endl;
-
 	HKEY hKey;
 
 	const int MAX_KEY_LENGTH = 255;
@@ -37,13 +35,12 @@ void ScannerRingThree::startScanning()
 	FILETIME ftLastWriteTime;      // last write time 
 
 	DWORD retCode;
-
-	if (RegOpenKeyEx(HKEY_LOCAL_MACHINE,
+	DWORD regOpenKeyErrorCode = RegOpenKeyEx(HKEY_LOCAL_MACHINE,
 		mScanningStartPath.c_str(),
 		0,
 		KEY_READ,
-		&hKey) == ERROR_SUCCESS
-		)
+		&hKey);
+	if (regOpenKeyErrorCode == ERROR_SUCCESS)
 	{						   // Get the class name and the value count. 
 		retCode = RegQueryInfoKey(
 			hKey,                    // key handle 
@@ -60,16 +57,16 @@ void ScannerRingThree::startScanning()
 			&ftLastWriteTime);       // last write time 
 	}
 	std::cout << "subkeys start amount: " << cSubKeys << std::endl;
-	if (cSubKeys)
+	if (cSubKeys !=0 )
 	{
-		createThreads(hKey, cSubKeys);
+		createWorkerThreads(hKey, cSubKeys);
 	}
 	RegCloseKey(hKey);
 
 	mScannerProgressStrategy->searchEnded(mMatchingKeys);
 }
 
-void ScannerRingThree::createThreads(HKEY hKey, DWORD cSubKeys)
+void ScannerRingThree::createWorkerThreads(HKEY hKey, DWORD cSubKeys)
 {
 	DWORD enumeratorStep;
 	bool useTwoThreads;
@@ -122,6 +119,7 @@ void ScannerRingThree::createThreads(HKEY hKey, DWORD cSubKeys)
 
 void ScannerRingThree::scan(HKEY hKey, DWORD regEnumIteratorStartPos, DWORD regEnumIteratorEndPos, bool isInitialCall)
 {
+
 	const int MAX_KEY_LENGTH = 255;
 	const int MAX_VALUE_NAME = 16383;
 
@@ -156,7 +154,7 @@ void ScannerRingThree::scan(HKEY hKey, DWORD regEnumIteratorStartPos, DWORD regE
 
 	DWORD enumIteratorStartPos = 0;
 	DWORD enumIteratorEndPos = 0;
-
+	//std::cout << "cSubKeys : " <<cSubKeys<< std::endl;
 	if (isInitialCall)
 	{
 		enumIteratorStartPos = regEnumIteratorStartPos;
@@ -178,11 +176,13 @@ void ScannerRingThree::scan(HKEY hKey, DWORD regEnumIteratorStartPos, DWORD regE
 		mTotalAmountOfKeys += cSubKeys;
 		mCountingMutex.unlock();
 	}
-
+	//std::cout << "enumIteratorStartPos : " << enumIteratorStartPos << std::endl;
+	//std::cout << "enumIteratorEndPos : " << enumIteratorEndPos << std::endl;
 	if (cSubKeys)
 	{
 		for (;enumIteratorStartPos < enumIteratorEndPos; enumIteratorStartPos++)
 		{
+
 			cbName = MAX_KEY_LENGTH;
 			retCode = RegEnumKeyEx(hKey, enumIteratorStartPos,
 				achKey,
@@ -194,7 +194,7 @@ void ScannerRingThree::scan(HKEY hKey, DWORD regEnumIteratorStartPos, DWORD regE
 
 			std::wstring keyName(achKey);
 
-			if (bool isMatching = searchForMatching(keyName))
+			if (bool isMatching = searchForMatching(keyName) || mSearchPattern.empty())
 			{
 				mNotifyingMutex.lock();
 
@@ -215,27 +215,47 @@ void ScannerRingThree::scan(HKEY hKey, DWORD regEnumIteratorStartPos, DWORD regE
 			//update percentage of progress
 			mScannerProgressStrategy->updateDataToShow(mScannedAmountOfKeys, mTotalAmountOfKeys);
 
-			mSubkeysPath[std::this_thread::get_id()] += L"\\" + keyName;
-			
-			if (retCode == ERROR_SUCCESS)
+			if (mSubkeysPath[std::this_thread::get_id()].empty() == true)
 			{
+				mSubkeysPath[std::this_thread::get_id()] = keyName;
+			}
+			else
+			{
+				mSubkeysPath[std::this_thread::get_id()] += L"\\" + keyName;
+			}			
+			/*_tprintf(TEXT("(%d) %s\n"), enumIteratorStartPos + 1, mSubkeysPath[std::this_thread::get_id()].c_str());
+			if (retCode == ERROR_SUCCESS)		*/
+			{
+			/*	std::cout << "retCode : ERROR_SUCCESS" << std::endl;*/
 				HKEY additionalKey;
-				if (RegOpenKeyEx(HKEY_LOCAL_MACHINE,
+
+				DWORD regOpenKeyErrorCode = RegOpenKeyEx(HKEY_LOCAL_MACHINE,
 					mSubkeysPath[std::this_thread::get_id()].c_str(),
 					0,
 					KEY_READ,
-					&additionalKey) == ERROR_SUCCESS
-					)
+					&additionalKey);
+				if (regOpenKeyErrorCode == ERROR_SUCCESS)
 				{
+					/*std::cout << "RegOpenKeyEx : ERROR_SUCCESS" << std::endl;*/
 					/*_tprintf(TEXT("(%d) %s\n"), enumIteratorStartPos + 1, mSubkeysPath[std::this_thread::get_id()].c_str());*/
 					
 					scan(additionalKey, enumIteratorStartPos, enumIteratorEndPos);
 					RegCloseKey(additionalKey);
-					std::size_t found = mSubkeysPath[std::this_thread::get_id()].rfind(L"\\");
-					if (found != std::string::npos)//restore string after recurse
-					{
-						mSubkeysPath[std::this_thread::get_id()].erase(found, mSubkeysPath[std::this_thread::get_id()].length() - found + 1);
-					}
+					
+					restorePreviousPathState();//restore after recurse
+				}
+				else if (regOpenKeyErrorCode == ERROR_PATH_NOT_FOUND || regOpenKeyErrorCode == ERROR_FILE_NOT_FOUND)
+				{
+					//system("cls");
+					/*std::wcout << mSubkeysPath[std::this_thread::get_id()] <<"  ERROR_PATH_NOT_FOUND || ERROR_FILE_NOT_FOUND" << std::endl;
+					std::terminate();*/
+				}
+				else if(regOpenKeyErrorCode == ERROR_ACCESS_DENIED)
+				{
+					//skip
+					/*std::wcout << mSubkeysPath[std::this_thread::get_id()] << L" ERROR_ACCESS_DENIED" << std::endl;*/
+
+					restorePreviousPathState();
 				}
 			}
 		}
@@ -255,12 +275,27 @@ bool ScannerRingThree::searchForMatching(const std::wstring& key)
 	}
 }
 
-void ScannerRingThree::checkScanningPathAndTruncateIfNeeded()
+void ScannerRingThree::restorePreviousPathState()
+{
+	std::size_t found = mSubkeysPath[std::this_thread::get_id()].rfind(L"\\");
+	if (found != std::string::npos)//restore string
+	{
+		mSubkeysPath[std::this_thread::get_id()].erase(found, mSubkeysPath[std::this_thread::get_id()].length() - found + 1);
+	}
+	else
+	{
+		std::wcout << "RESETTING!!!" << mSubkeysPath[std::this_thread::get_id()] << std::endl;
+		mSubkeysPath[std::this_thread::get_id()].clear();
+	}
+}
+
+void ScannerRingThree::checkStartScanningPathAndTruncateIfNeeded()
 {
 	std::size_t found = mScanningStartPath.find(L"HKLM\\");
 	if (found != std::string::npos)
 	{
-
+		mScanningStartPath.erase(found, found + 5);
+		std::wcout << mScanningStartPath;
 	}
 }
 

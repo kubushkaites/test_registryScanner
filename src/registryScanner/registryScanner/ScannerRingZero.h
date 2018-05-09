@@ -17,7 +17,7 @@ public:
 	virtual ~ScannerRingZero() {}
 protected:
 	virtual void scan(HKEY hKey, DWORD regEnumIteratorStartPos, DWORD regEnumIteratorEndPos, bool isInitialCall = false) override;
-	virtual void createThreads(HKEY hKey, DWORD cSubKeys) override;
+	virtual void createWorkerThreads(HKEY hKey, DWORD cSubKeys) override;
 private:
 	std::wstring mScanningStartPath;
 	std::wstring mSearchPattern;
