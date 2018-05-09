@@ -14,7 +14,8 @@ public:
 	virtual void notifyOnNewScanningResultReceived() override;
 	virtual ~ScannerRingZero() {}
 protected:
-	virtual void scan(HKEY hKey, DWORD regEnumIterator) override;
+	virtual void scan(HKEY hKey, DWORD regEnumIteratorStartPos, DWORD regEnumIteratorEndPos) override;
+	virtual void createThreads(HKEY hKey, DWORD cSubKeys) override;
 private:
 	std::wstring mScanningStartPath;
 	std::wstring mSearchPattern;

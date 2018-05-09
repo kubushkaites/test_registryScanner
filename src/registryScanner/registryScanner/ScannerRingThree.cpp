@@ -56,33 +56,52 @@ void ScannerRingThree::startScanning()
 
 	if (cSubKeys)
 	{
-		DWORD enumeratorStep = cSubKeys / 4;
-		DWORD startRegEnumIteratorForLastThread = 0;
-		if (enumeratorStep % 4 != 0)
-		{
-			startRegEnumIteratorForLastThread = cSubKeys - enumeratorStep * 3;
-		}
-		else
-		{
-			startRegEnumIteratorForLastThread = enumeratorStep;
-		}
-		auto taskOneFunc = std::bind(&ScannerRingThree::scan, this, std::placeholders::_1, std::placeholders::_2);
-		auto taskTwoFunc = std::bind(&ScannerRingThree::scan, this, std::placeholders::_1, std::placeholders::_2);
-		auto taskThreeFunc = std::bind(&ScannerRingThree::scan, this, std::placeholders::_1, std::placeholders::_2);
-		auto taskFourFunc = std::bind(&ScannerRingThree::scan, this, std::placeholders::_1, std::placeholders::_2);
-				
-		auto scanTaskOne = std::async(taskOneFunc, hKey, enumeratorStep);
-		auto scanTaskTwo = std::async(taskTwoFunc, hKey, enumeratorStep);
-		auto scanTaskThree = std::async(taskThreeFunc, hKey, enumeratorStep);
-		auto scanTaskFour = std::async(taskFourFunc, hKey, enumeratorStep);
-
+		createThreads(hKey, cSubKeys);
 	}
 }
 
+void ScannerRingThree::createThreads(HKEY hKey, DWORD cSubKeys)
+{
+	DWORD enumeratorStep;
 
-void ScannerRingThree::scan(HKEY hKey, DWORD regEnumIterator)
+	if (cSubKeys / 2)
+	{
+		enumeratorStep = cSubKeys / 2;
+	}
+	else if (cSubKeys == 1)
+	{
+		enumeratorStep = 1;
+	}
+
+	DWORD startRegEnumIteratorForSecondThread = 0;
+	if (enumeratorStep % 2 != 0)
+	{
+		startRegEnumIteratorForSecondThread = cSubKeys - enumeratorStep;
+	}
+	else
+	{
+		startRegEnumIteratorForSecondThread = enumeratorStep;
+	}
+
+	//if only one subkey available on current path process it by one thread, else process in two threads
+	
+	auto taskOneFunc = std::bind(&ScannerRingThree::scan, this, std::placeholders::_1, std::placeholders::_2);
+	auto scanTaskOne = std::async(taskOneFunc, hKey, 0, enumeratorStep);
+
+	if (startRegEnumIteratorForSecondThread != 0)
+	{
+		auto taskTwoFunc = std::bind(&ScannerRingThree::scan, this, std::placeholders::_1, std::placeholders::_2);
+		auto scanTaskTwo = std::async(taskTwoFunc, enumeratorStep, cSubKeys);
+	}
+	
+
+}
+
+void ScannerRingThree::scan(HKEY hKey, DWORD regEnumIteratorStartPos, DWORD regEnumIteratorEndPos)
 {
 }
+
+
 
 
 void ScannerRingThree::stopScanning()

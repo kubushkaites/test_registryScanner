@@ -15,7 +15,11 @@ void ScannerRingZero::startScanning()
 }
 
 
-void ScannerRingZero::scan(HKEY hKey, DWORD regEnumIterator)
+void ScannerRingZero::scan(HKEY hKey, DWORD regEnumIteratorStartPos, DWORD regEnumIteratorEndPos)
+{
+}
+
+void ScannerRingZero::createThreads(HKEY hKey, DWORD cSubKeys)
 {
 }
 
