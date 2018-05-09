@@ -29,6 +29,8 @@
 #include <iostream>
 #include <memory>
 #include <algorithm>
+#include <functional>
+#include <future>
 #include <fstream>
 
 #pragma warning(pop) //For /Wall

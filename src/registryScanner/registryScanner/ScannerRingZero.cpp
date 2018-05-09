@@ -2,9 +2,10 @@
 #include "LoggerToFile.h"
 #include "ScannerProgressStrategy.h"
 
-ScannerRingZero::ScannerRingZero(std::wstring scanningStartPath)
+ScannerRingZero::ScannerRingZero(std::wstring scanningStartPath, std::wstring searchPattern)
 	:IScanner(),
-	mScanningStartPath(scanningStartPath)
+	mScanningStartPath(scanningStartPath),
+	mSearchPattern(searchPattern)
 {
 
 }
@@ -12,6 +13,12 @@ ScannerRingZero::ScannerRingZero(std::wstring scanningStartPath)
 void ScannerRingZero::startScanning()
 {
 }
+
+
+void ScannerRingZero::scan(HKEY hKey, DWORD regEnumIterator)
+{
+}
+
 
 void ScannerRingZero::stopScanning()
 {

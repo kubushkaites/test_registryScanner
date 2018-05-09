@@ -5,7 +5,7 @@
 class ScannerRingThree : public IScanner
 {
 public:
-	ScannerRingThree(std::wstring scanningStartPath);
+	ScannerRingThree(std::wstring scanningStartPath, std::wstring searchPattern = L"");//use default value for making possible just iterate through all the registry also
 	virtual void startScanning() override;
 	virtual void stopScanning() override;
 	virtual void changeScanningStartPath(std::wstring scanningStartPath) override;
@@ -13,8 +13,11 @@ public:
 	virtual void setScanningProgressStrategy(ScannerProgressStrategySharedPtr scannerProgressStrategy) override;
 	virtual void notifyOnNewScanningResultReceived() override;
 	virtual ~ScannerRingThree() {}
+protected:
+	virtual void scan(HKEY hKey, DWORD regEnumIterator) override;
 private:
 	std::wstring mScanningStartPath;
+	std::wstring mSearchPattern;
 	ScannerProgressStrategySharedPtr mScannerProgressStrategy;
 	std::list<IScanningResultObserverSharedPtr> mScannerObservers;
 };

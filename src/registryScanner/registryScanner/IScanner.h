@@ -19,4 +19,6 @@ public:
 	virtual void setScanningProgressStrategy(ScannerProgressStrategySharedPtr) = 0;
 	virtual void notifyOnNewScanningResultReceived() = 0;
 	virtual ~IScanner() {}
+protected:
+	virtual void scan(HKEY hKey,DWORD regEnumIterator) = 0;
 };

@@ -15,7 +15,8 @@ int main()
 	std::shared_ptr<IScanner> scannerRingZeroPtr(factoryPtr->createScannerRingZero(L"sss"));
 	std::shared_ptr<IScanner> scannerRingThreePtr(factoryPtr->createScannerRingThree(L"HKLM"));
 		
-	std::list<IScannerProgressSharedPtr> scannerProgressList{ IScannerProgressSharedPtr(new ScannerProgressToConsole()) };//class logs percentage and show result of how many keys found
+	std::list<IScannerProgressSharedPtr> scannerProgressList{ IScannerProgressSharedPtr(new ScannerProgressToConsole()) };//scanner progress list contains receivers of information 
+																														//about percentage of success of scanning process and info about how many keys were found
 	std::shared_ptr<ScannerProgressStrategy> scannerProgressStrategy(new ScannerProgressStrategy(scannerProgressList));
 
 	scannerRingZeroPtr->setScanningProgressStrategy(scannerProgressStrategy);//add to strategy identifiers to know from what class info received;

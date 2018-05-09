@@ -2,15 +2,88 @@
 #include "LoggerToFile.h"
 #include "ScannerProgressStrategy.h"
 
-ScannerRingThree::ScannerRingThree(std::wstring scanningStartPath)
+ScannerRingThree::ScannerRingThree(std::wstring scanningStartPath, std::wstring searchPattern)
 	:IScanner(),
-	mScanningStartPath(scanningStartPath)
+	mScanningStartPath(scanningStartPath),
+	mSearchPattern(searchPattern)
+
 {
 }
 
 void ScannerRingThree::startScanning()
 {
+	HKEY hKey;
+
+	const int MAX_KEY_LENGTH = 255;
+	const int MAX_VALUE_NAME = 16383;
+	
+	TCHAR    achKey[MAX_KEY_LENGTH];   // buffer for subkey name
+	DWORD    cbName;                   // size of name string 
+	TCHAR    achClass[MAX_PATH] = TEXT("");  // buffer for class name 
+	DWORD    cchClassName = MAX_PATH;  // size of class string 
+	DWORD    cSubKeys = 0;               // number of subkeys 
+	DWORD    cbMaxSubKey;              // longest subkey size 
+	DWORD    cchMaxClass;              // longest class string 
+	DWORD    cValues;              // number of values for key 
+	DWORD    cchMaxValue;          // longest value name 
+	DWORD    cbMaxValueData;       // longest value data 
+	DWORD    cbSecurityDescriptor; // size of security descriptor 
+	FILETIME ftLastWriteTime;      // last write time 
+
+	DWORD retCode;
+
+	if (RegOpenKeyEx(HKEY_LOCAL_MACHINE,
+		mScanningStartPath.c_str(),
+		0,
+		KEY_READ,
+		&hKey) == ERROR_SUCCESS
+		)
+	{						   // Get the class name and the value count. 
+		retCode = RegQueryInfoKey(
+			hKey,                    // key handle 
+			achClass,                // buffer for class name 
+			&cchClassName,           // size of class string 
+			NULL,                    // reserved 
+			&cSubKeys,               // number of subkeys 
+			&cbMaxSubKey,            // longest subkey size 
+			&cchMaxClass,            // longest class string 
+			&cValues,                // number of values for this key 
+			&cchMaxValue,            // longest value name 
+			&cbMaxValueData,         // longest value data 
+			&cbSecurityDescriptor,   // security descriptor 
+			&ftLastWriteTime);       // last write time 
+	}
+
+	if (cSubKeys)
+	{
+		DWORD enumeratorStep = cSubKeys / 4;
+		DWORD startRegEnumIteratorForLastThread = 0;
+		if (enumeratorStep % 4 != 0)
+		{
+			startRegEnumIteratorForLastThread = cSubKeys - enumeratorStep * 3;
+		}
+		else
+		{
+			startRegEnumIteratorForLastThread = enumeratorStep;
+		}
+		auto taskOneFunc = std::bind(&ScannerRingThree::scan, this, std::placeholders::_1, std::placeholders::_2);
+		auto taskTwoFunc = std::bind(&ScannerRingThree::scan, this, std::placeholders::_1, std::placeholders::_2);
+		auto taskThreeFunc = std::bind(&ScannerRingThree::scan, this, std::placeholders::_1, std::placeholders::_2);
+		auto taskFourFunc = std::bind(&ScannerRingThree::scan, this, std::placeholders::_1, std::placeholders::_2);
+				
+		auto scanTaskOne = std::async(taskOneFunc, hKey, enumeratorStep);
+		auto scanTaskTwo = std::async(taskTwoFunc, hKey, enumeratorStep);
+		auto scanTaskThree = std::async(taskThreeFunc, hKey, enumeratorStep);
+		auto scanTaskFour = std::async(taskFourFunc, hKey, enumeratorStep);
+
+	}
 }
+
+
+void ScannerRingThree::scan(HKEY hKey, DWORD regEnumIterator)
+{
+}
+
 
 void ScannerRingThree::stopScanning()
 {
