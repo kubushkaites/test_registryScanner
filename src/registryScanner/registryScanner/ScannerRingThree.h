@@ -19,7 +19,9 @@ protected:
 	virtual void scan(HKEY hKey, DWORD regEnumIteratorStartPos, DWORD regEnumIteratorEndPos, bool isInitialCall = false) override;
 	virtual void createWorkerThreads(HKEY hKey, DWORD cSubKeys) override;
 private:
+	void tryToNotifyAboutFoundPattern(const std::wstring& keyName);
 	bool searchForMatching(const std::wstring& key);
+	void makeNextSubkeyPath(const std::wstring& keyName);
 	void restorePreviousPathState();
 	void checkStartScanningPathAndTruncateIfNeeded();
 private:

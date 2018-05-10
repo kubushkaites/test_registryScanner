@@ -21,14 +21,20 @@ void ScannerProgressToConsole::updateDataToShow(uint64_t scannedKeys, uint64_t t
 	//mKeysMutex.unlock();
 }
 
+void ScannerProgressToConsole::onErrorOccured(DWORD errorCode)
+{
+	std::lock_guard<std::mutex> guardWriteToConsoleMutex(mWriteToConsoleMutex);
+	system("cls");
+	std::cout << "Error occured!!! Error code : " << errorCode << std::endl;
+}
+
 void ScannerProgressToConsole::searchEnded(uint64_t foundKeys)
 {
-	mMinutesMutex.lock();	
+	std::lock_guard<std::mutex> guardWriteToConsoleMutex(mWriteToConsoleMutex);
+
 	system("cls");
 	isFinished = true;
-	std::cout << "Search ended. Amount of keys found : " << foundKeys << std::endl;
-	
-	mMinutesMutex.unlock();
+	std::cout << "Search ended. Amount of keys found : " << foundKeys << std::endl;	
 	//mWriteToConsoleMutex.lock();
 	//system("cls");
 	//isFinished = true;
@@ -41,6 +47,7 @@ void ScannerProgressToConsole::showProgress()
 	while (true) 
 	{
 		mMinutesMutex.lock();
+		mWriteToConsoleMutex.lock();
 
 		if (isFinished == false)
 		{
@@ -52,8 +59,9 @@ void ScannerProgressToConsole::showProgress()
 		{
 			return;
 		}
+		mWriteToConsoleMutex.unlock();
 		mMinutesMutex.unlock();
-		
+
 		Sleep(300);
 	}
 	//

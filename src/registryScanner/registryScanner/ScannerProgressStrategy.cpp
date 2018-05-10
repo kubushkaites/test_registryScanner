@@ -21,6 +21,10 @@ void ScannerProgressStrategy::searchEnded(uint64_t foundKeys)
 	}
 }
 
+void ScannerProgressStrategy::onErrorOccured(DWORD errorCode)
+{
+}
+
 void ScannerProgressStrategy::addProgressViewer(const IScannerProgressSharedPtr viewer)
 {
 	mViewersList.push_back(viewer);

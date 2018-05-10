@@ -194,37 +194,19 @@ void ScannerRingThree::scan(HKEY hKey, DWORD regEnumIteratorStartPos, DWORD regE
 
 			std::wstring keyName(achKey);
 
-			if (bool isMatching = searchForMatching(keyName) || mSearchPattern.empty())
-			{
-				mNotifyingMutex.lock();
-
-				mFoundKey = keyName;
-				mFoundPath = mSubkeysPath[std::this_thread::get_id()];
-
-				notifyOnNewScanningResultReceived();
-
-				++mMatchingKeys;
-
-				mNotifyingMutex.unlock();
-			}
-
 			mCountingMutex.lock();
 				++mScannedAmountOfKeys;
 			mCountingMutex.unlock();
+			
+			//check if it is needed to notify observer about found matching results
+			tryToNotifyAboutFoundPattern(keyName);
 
 			//update percentage of progress
 			mScannerProgressStrategy->updateDataToShow(mScannedAmountOfKeys, mTotalAmountOfKeys);
 
-			if (mSubkeysPath[std::this_thread::get_id()].empty() == true)
-			{
-				mSubkeysPath[std::this_thread::get_id()] = keyName;
-			}
-			else
-			{
-				mSubkeysPath[std::this_thread::get_id()] += L"\\" + keyName;
-			}			
-			/*_tprintf(TEXT("(%d) %s\n"), enumIteratorStartPos + 1, mSubkeysPath[std::this_thread::get_id()].c_str());
-			if (retCode == ERROR_SUCCESS)		*/
+			makeNextSubkeyPath(keyName);
+		/*	_tprintf(TEXT("(%d) %s\n"), enumIteratorStartPos + 1, mSubkeysPath[std::this_thread::get_id()].c_str());*/
+			if (retCode == ERROR_SUCCESS)		
 			{
 			/*	std::cout << "retCode : ERROR_SUCCESS" << std::endl;*/
 				HKEY additionalKey;
@@ -262,6 +244,23 @@ void ScannerRingThree::scan(HKEY hKey, DWORD regEnumIteratorStartPos, DWORD regE
 	}
 }
 
+void ScannerRingThree::tryToNotifyAboutFoundPattern(const std::wstring & keyName)
+{
+	if (bool isMatching = searchForMatching(keyName) || mSearchPattern.empty())
+	{
+		mNotifyingMutex.lock();
+
+		mFoundKey = keyName;
+		mFoundPath = mSubkeysPath[std::this_thread::get_id()];
+
+		notifyOnNewScanningResultReceived();
+
+		++mMatchingKeys;
+
+		mNotifyingMutex.unlock();
+	}
+}
+
 bool ScannerRingThree::searchForMatching(const std::wstring& key)
 {
 	std::size_t found = key.find(mSearchPattern);
@@ -272,6 +271,18 @@ bool ScannerRingThree::searchForMatching(const std::wstring& key)
 	else
 	{
 		return false;
+	}
+}
+
+void ScannerRingThree::makeNextSubkeyPath(const std::wstring & keyName)
+{
+	if (mSubkeysPath[std::this_thread::get_id()].empty() == true)
+	{
+		mSubkeysPath[std::this_thread::get_id()] = keyName;
+	}
+	else
+	{
+		mSubkeysPath[std::this_thread::get_id()] += L"\\" + keyName;
 	}
 }
 
