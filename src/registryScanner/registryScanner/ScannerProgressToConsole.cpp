@@ -10,40 +10,65 @@ ScannerProgressToConsole::ScannerProgressToConsole()
 
 void ScannerProgressToConsole::updateDataToShow(uint64_t scannedKeys, uint64_t totalAmountOfKeys)
 {
-	mPercentsVarMutex.lock();
-	mPercentOfSuccess = (static_cast<double>(scannedKeys) / totalAmountOfKeys) * 100;
-	mPercentsVarMutex.unlock();
+	mMinutesMutex.lock();
+	mApproximateAmountOfMinutes = 10 - ((static_cast<double>(scannedKeys) / totalAmountOfKeys) * 10);
+	mMinutesMutex.unlock();
+	//mKeysMutex.lock();
+	//mScannedKeys = scannedKeys;
+	//mTotalAmountOfKeys = totalAmountOfKeys;
+	//mKeysMutex.unlock();
 }
 
 void ScannerProgressToConsole::searchEnded(uint64_t foundKeys)
 {
-	mPercentsVarMutex.lock();
-
-	mPercentOfSuccess = 100;
+	mMinutesMutex.lock();	
 	system("cls");
+	isFinished = true;
 	std::cout << "Search ended. Amount of keys found : " << foundKeys << std::endl;
 	
-	mPercentsVarMutex.unlock();
+	mMinutesMutex.unlock();
+	//mWriteToConsoleMutex.lock();
+	//system("cls");
+	//isFinished = true;
+	//std::cout << "Search ended. Amount of matching keys found : " << foundKeys << std::endl;
+	//mWriteToConsoleMutex.unlock();
 }
 
 void ScannerProgressToConsole::showProgress()
 {	
 	while (true) 
 	{
-		mPercentsVarMutex.lock();
+		mMinutesMutex.lock();
 
-		if (mPercentOfSuccess != 100)
+		if (isFinished == false)
 		{
 			system("cls");
-			std::cout << "Current percentage : " << mPercentOfSuccess << " % " << std::endl;
+			std::cout<<"Approximate amount of minutes : "<<mApproximateAmountOfMinutes<<std::endl;
 		}
 		else
 		{
 			return;
 		}
-		mPercentsVarMutex.unlock();
+		mMinutesMutex.unlock();
 		
-		Sleep(50);
+		Sleep(30);
 	}
+	//
+	//while (true)
+	//{
+	//	mWriteToConsoleMutex.lock();
+	//	if(isFinished == false)	
+	//	{ 
+	//		system("cls");
+	//		std::cout << "Scanned keys : " << mScannedKeys << "; current total amount of keys found : "<< mTotalAmountOfKeys << std::endl;
+	//	}
+	//	else
+	//	{
+	//		return;
+	//	}
+	//	mWriteToConsoleMutex.unlock();
+	//	Sleep(3500);
+	//}
+	
 }
 

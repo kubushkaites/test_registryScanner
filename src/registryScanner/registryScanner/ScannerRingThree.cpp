@@ -284,7 +284,7 @@ void ScannerRingThree::restorePreviousPathState()
 	}
 	else
 	{
-		std::wcout << "RESETTING!!!" << mSubkeysPath[std::this_thread::get_id()] << std::endl;
+		/*std::wcout << "RESETTING!!!" << mSubkeysPath[std::this_thread::get_id()] << std::endl;*/
 		mSubkeysPath[std::this_thread::get_id()].clear();
 	}
 }
