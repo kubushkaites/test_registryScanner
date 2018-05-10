@@ -11,7 +11,9 @@ ScannerProgressToConsole::ScannerProgressToConsole()
 void ScannerProgressToConsole::updateDataToShow(uint64_t scannedKeys, uint64_t totalAmountOfKeys)
 {
 	mMinutesMutex.lock();
-	mApproximateAmountOfMinutes = 10 - ((static_cast<double>(scannedKeys) / totalAmountOfKeys) * 10);
+	mApproximateAmountOfMinutes = static_cast<uint64_t>(10 - ((static_cast<double>(scannedKeys) / totalAmountOfKeys) * 10));
+	if (mApproximateAmountOfMinutes < 1)
+		mApproximateAmountOfMinutes = 1; //not showing seconds so not showing anything less than 1
 	mMinutesMutex.unlock();
 	//mKeysMutex.lock();
 	//mScannedKeys = scannedKeys;
@@ -43,7 +45,8 @@ void ScannerProgressToConsole::showProgress()
 		if (isFinished == false)
 		{
 			system("cls");
-			std::cout<<"Approximate amount of minutes : "<<mApproximateAmountOfMinutes<<std::endl;
+			std::cout << "Approximate amount of time : ";
+			std::cout << mApproximateAmountOfMinutes << " min" << std::endl;
 		}
 		else
 		{
@@ -51,7 +54,7 @@ void ScannerProgressToConsole::showProgress()
 		}
 		mMinutesMutex.unlock();
 		
-		Sleep(30);
+		Sleep(300);
 	}
 	//
 	//while (true)
