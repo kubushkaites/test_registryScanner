@@ -8,7 +8,7 @@ ScannerProgressToConsole::ScannerProgressToConsole()
 	mShowPercentsThr.detach();
 }
 
-void ScannerProgressToConsole::updateDataToShow(uint64_t scannedKeys, uint64_t totalAmountOfKeys)
+void ScannerProgressToConsole::updateDataToShow(const uint64_t scannedKeys,const uint64_t totalAmountOfKeys)
 {
 	mMinutesMutex.lock();
 	mApproximateAmountOfMinutes = static_cast<uint64_t>(10 - ((static_cast<double>(scannedKeys) / totalAmountOfKeys) * 10));
@@ -21,18 +21,25 @@ void ScannerProgressToConsole::updateDataToShow(uint64_t scannedKeys, uint64_t t
 	//mKeysMutex.unlock();
 }
 
-void ScannerProgressToConsole::onErrorOccured(DWORD errorCode)
+void ScannerProgressToConsole::onErrorOccured(const DWORD errorCode)
 {
 	std::lock_guard<std::mutex> guardWriteToConsoleMutex(mWriteToConsoleMutex);
-	system("cls");
-	std::cout << "Error occured!!! Error code : " << errorCode << std::endl;
+	if (showTime)//clean approximate time before show an error
+	{
+		system("cls");
+	}
+	showTime = false;
+	std::cout << "Error occured!!! winerror code : " << errorCode << std::endl;
 }
 
-void ScannerProgressToConsole::searchEnded(uint64_t foundKeys)
+void ScannerProgressToConsole::searchEnded(const uint64_t foundKeys)
 {
 	std::lock_guard<std::mutex> guardWriteToConsoleMutex(mWriteToConsoleMutex);
 
-	system("cls");
+	if (showTime)
+	{
+		system("cls");
+	}
 	isFinished = true;
 	std::cout << "Search ended. Amount of keys found : " << foundKeys << std::endl;	
 	//mWriteToConsoleMutex.lock();
@@ -44,7 +51,7 @@ void ScannerProgressToConsole::searchEnded(uint64_t foundKeys)
 
 void ScannerProgressToConsole::showProgress()
 {	
-	while (true) 
+	while (showTime) 
 	{
 		mMinutesMutex.lock();
 		mWriteToConsoleMutex.lock();
@@ -52,8 +59,7 @@ void ScannerProgressToConsole::showProgress()
 		if (isFinished == false)
 		{
 			system("cls");
-			std::cout << "Approximate amount of time : ";
-			std::cout << mApproximateAmountOfMinutes << " min" << std::endl;
+			std::cout << "Approximate amount of time : "<< mApproximateAmountOfMinutes << " min" << std::endl;
 		}
 		else
 		{
@@ -62,7 +68,7 @@ void ScannerProgressToConsole::showProgress()
 		mWriteToConsoleMutex.unlock();
 		mMinutesMutex.unlock();
 
-		Sleep(300);
+		Sleep(100);
 	}
 	//
 	//while (true)

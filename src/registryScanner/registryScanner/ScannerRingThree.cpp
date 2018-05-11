@@ -7,14 +7,15 @@ ScannerRingThree::ScannerRingThree(const std::wstring& scanningStartPath, const 
 	mScanningStartPath(scanningStartPath),
 	mSearchPattern(searchPattern),
 	mFoundKey(L""),
-	mFoundPath(L"")
+	mFoundPath(L""),
+	mScannerProgressStrategy(nullptr)
 {
 	checkStartScanningPathAndTruncateIfNeeded();
 	//auto totalAmountOfKeysFunc = std::bind(&ScannerRingThree::countTotalAmountOfKeys, this);
 	//mCountTotalAmountOfKeysTask = std::async(totalAmountOfKeysFunc);
 }
 
-void ScannerRingThree::startScanning()
+bool ScannerRingThree::startScanning()
 {
 	HKEY hKey;
 
@@ -56,14 +57,33 @@ void ScannerRingThree::startScanning()
 			&cbSecurityDescriptor,   // security descriptor 
 			&ftLastWriteTime);       // last write time 
 	}
-	std::cout << "subkeys start amount: " << cSubKeys << std::endl;
+	else if(regOpenKeyErrorCode == ERROR_PATH_NOT_FOUND || regOpenKeyErrorCode == ERROR_FILE_NOT_FOUND)
+	{
+		if (mScannerProgressStrategy.get() != nullptr)
+		{
+			mScannerProgressStrategy->onErrorOccured(regOpenKeyErrorCode);
+			mScannerProgressStrategy->searchEnded(mMatchingKeys);
+		}
+		RegCloseKey(hKey);	
+		return false;
+	}
 	if (cSubKeys !=0 )
 	{
 		createWorkerThreads(hKey, cSubKeys);
+		if (mScanningErrors.empty() == false)
+		{	
+			RegCloseKey(hKey);
+			return false;
+		}
 	}
 	RegCloseKey(hKey);
 
-	mScannerProgressStrategy->searchEnded(mMatchingKeys);
+	if (mScannerProgressStrategy.get() != nullptr)
+	{
+		mScannerProgressStrategy->searchEnded(mMatchingKeys);
+	}
+
+	return true;
 }
 
 void ScannerRingThree::createWorkerThreads(HKEY hKey, DWORD cSubKeys)
@@ -154,7 +174,7 @@ void ScannerRingThree::scan(HKEY hKey, DWORD regEnumIteratorStartPos, DWORD regE
 
 	DWORD enumIteratorStartPos = 0;
 	DWORD enumIteratorEndPos = 0;
-	//std::cout << "cSubKeys : " <<cSubKeys<< std::endl;
+
 	if (isInitialCall)
 	{
 		enumIteratorStartPos = regEnumIteratorStartPos;
@@ -176,13 +196,11 @@ void ScannerRingThree::scan(HKEY hKey, DWORD regEnumIteratorStartPos, DWORD regE
 		mTotalAmountOfKeys += cSubKeys;
 		mCountingMutex.unlock();
 	}
-	//std::cout << "enumIteratorStartPos : " << enumIteratorStartPos << std::endl;
-	//std::cout << "enumIteratorEndPos : " << enumIteratorEndPos << std::endl;
+
 	if (cSubKeys)
 	{
 		for (;enumIteratorStartPos < enumIteratorEndPos; enumIteratorStartPos++)
 		{
-
 			cbName = MAX_KEY_LENGTH;
 			retCode = RegEnumKeyEx(hKey, enumIteratorStartPos,
 				achKey,
@@ -202,13 +220,15 @@ void ScannerRingThree::scan(HKEY hKey, DWORD regEnumIteratorStartPos, DWORD regE
 			tryToNotifyAboutFoundPattern(keyName);
 
 			//update percentage of progress
-			mScannerProgressStrategy->updateDataToShow(mScannedAmountOfKeys, mTotalAmountOfKeys);
+			if (mScannerProgressStrategy.get() != nullptr)
+			{
+				mScannerProgressStrategy->updateDataToShow(mScannedAmountOfKeys, mTotalAmountOfKeys);
+			}
 
 			makeNextSubkeyPath(keyName);
-		/*	_tprintf(TEXT("(%d) %s\n"), enumIteratorStartPos + 1, mSubkeysPath[std::this_thread::get_id()].c_str());*/
+		
 			if (retCode == ERROR_SUCCESS)		
 			{
-			/*	std::cout << "retCode : ERROR_SUCCESS" << std::endl;*/
 				HKEY additionalKey;
 
 				DWORD regOpenKeyErrorCode = RegOpenKeyEx(HKEY_LOCAL_MACHINE,
@@ -218,27 +238,25 @@ void ScannerRingThree::scan(HKEY hKey, DWORD regEnumIteratorStartPos, DWORD regE
 					&additionalKey);
 				if (regOpenKeyErrorCode == ERROR_SUCCESS)
 				{
-					/*std::cout << "RegOpenKeyEx : ERROR_SUCCESS" << std::endl;*/
-					/*_tprintf(TEXT("(%d) %s\n"), enumIteratorStartPos + 1, mSubkeysPath[std::this_thread::get_id()].c_str());*/
-					
-					scan(additionalKey, enumIteratorStartPos, enumIteratorEndPos);
-					RegCloseKey(additionalKey);
-					
+					scan(additionalKey, enumIteratorStartPos, enumIteratorEndPos);				
 					restorePreviousPathState();//restore after recurse
 				}
 				else if (regOpenKeyErrorCode == ERROR_PATH_NOT_FOUND || regOpenKeyErrorCode == ERROR_FILE_NOT_FOUND)
-				{
-					//system("cls");
-					/*std::wcout << mSubkeysPath[std::this_thread::get_id()] <<"  ERROR_PATH_NOT_FOUND || ERROR_FILE_NOT_FOUND" << std::endl;
-					std::terminate();*/
+				{					
+					if (mScannerProgressStrategy.get() != nullptr)
+					{
+						mScannerProgressStrategy->onErrorOccured(regOpenKeyErrorCode);
+					}
+					//set what path caused and error and return;
+					mScanningErrors[mSubkeysPath[std::this_thread::get_id()]] = regOpenKeyErrorCode;
+					return;
 				}
 				else if(regOpenKeyErrorCode == ERROR_ACCESS_DENIED)
 				{
 					//skip
-					/*std::wcout << mSubkeysPath[std::this_thread::get_id()] << L" ERROR_ACCESS_DENIED" << std::endl;*/
-
 					restorePreviousPathState();
 				}
+				RegCloseKey(additionalKey);
 			}
 		}
 	}
@@ -295,7 +313,6 @@ void ScannerRingThree::restorePreviousPathState()
 	}
 	else
 	{
-		/*std::wcout << "RESETTING!!!" << mSubkeysPath[std::this_thread::get_id()] << std::endl;*/
 		mSubkeysPath[std::this_thread::get_id()].clear();
 	}
 }
@@ -333,9 +350,12 @@ void ScannerRingThree::setScanningProgressStrategy(ScannerProgressStrategyShared
 
 void ScannerRingThree::notifyOnNewScanningResultReceived()
 {
-	for (auto& observer : mScannerObservers)
+	if (mScannerObservers.empty() == false)
 	{
-		observer->onNewScanningResultReceived();
+		for (auto& observer : mScannerObservers)
+		{
+			observer->onNewScanningResultReceived();
+		}
 	}
 }
 

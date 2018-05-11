@@ -6,7 +6,7 @@ class ScannerRingThree : public IScanner
 {
 public:
 	ScannerRingThree(const std::wstring& scanningStartPath, const std::wstring& searchPattern = L"");//use default value for making possible just iterate through all the registry also
-	virtual void startScanning() override;
+	virtual bool startScanning() override;
 	virtual void stopScanning() override;
 	virtual void changeScanningStartPath(std::wstring scanningStartPath) override;
 	virtual void addScannerObserver(IScanningResultObserverSharedPtr scannerObserver) override;
@@ -37,10 +37,12 @@ private:
 	std::future<void> mCountTotalAmountOfKeysTask;
 
 	std::map<std::thread::id, std::wstring> mSubkeysPath;
+	std::map<std::wstring, DWORD> mScanningErrors;
 
 	uint64_t mScannedAmountOfKeys = 0;
 	uint64_t mMatchingKeys = 0;
 	uint64_t mTotalAmountOfKeys = 0;
+	
 
 	ScannerProgressStrategySharedPtr mScannerProgressStrategy;
 	std::list<IScanningResultObserverSharedPtr> mScannerObservers;

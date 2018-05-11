@@ -1,28 +1,41 @@
 #include "ScannerProgressStrategy.h"
 
-ScannerProgressStrategy::ScannerProgressStrategy(std::list<IScannerProgressSharedPtr> viewersList)
+ScannerProgressStrategy::ScannerProgressStrategy(const std::list<IScannerProgressSharedPtr> viewersList)
 	:mViewersList(viewersList)
 {
 }
 
-void ScannerProgressStrategy::updateDataToShow(uint64_t scannedKeys, uint64_t totalAmountOfKeys)
+void ScannerProgressStrategy::updateDataToShow(const uint64_t scannedKeys, const uint64_t totalAmountOfKeys)
 {
-	for (auto& item : mViewersList)
+	if (mViewersList.empty() == false)
 	{
-		item->updateDataToShow(scannedKeys, totalAmountOfKeys);
+		for (auto& item : mViewersList)
+		{
+			item->updateDataToShow(scannedKeys, totalAmountOfKeys);
+		}
 	}
 }
 
-void ScannerProgressStrategy::searchEnded(uint64_t foundKeys)
+void ScannerProgressStrategy::searchEnded(const uint64_t foundKeys)
 {
-	for (auto& item : mViewersList)
+	if (mViewersList.empty() == false)
 	{
-		item->searchEnded(foundKeys);
+		for (auto& item : mViewersList)
+		{
+			item->searchEnded(foundKeys);
+		}
 	}
 }
 
-void ScannerProgressStrategy::onErrorOccured(DWORD errorCode)
+void ScannerProgressStrategy::onErrorOccured(const DWORD errorCode)
 {
+	if (mViewersList.empty() == false)
+	{
+		for (auto& item : mViewersList)
+		{
+			item->onErrorOccured(errorCode);
+		}
+	}
 }
 
 void ScannerProgressStrategy::addProgressViewer(const IScannerProgressSharedPtr viewer)

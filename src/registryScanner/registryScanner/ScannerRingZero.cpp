@@ -5,13 +5,15 @@
 ScannerRingZero::ScannerRingZero(const std::wstring& scanningStartPath, const std::wstring& searchPattern)
 	:IScanner(),
 	mScanningStartPath(scanningStartPath),
-	mSearchPattern(searchPattern)
+	mSearchPattern(searchPattern),
+	mScannerProgressStrategy(nullptr)
 {
 
 }
 
-void ScannerRingZero::startScanning()
+bool ScannerRingZero::startScanning()
 {
+	return true;
 }
 
 
@@ -47,9 +49,12 @@ void ScannerRingZero::setScanningProgressStrategy(ScannerProgressStrategySharedP
 
 void ScannerRingZero::notifyOnNewScanningResultReceived()
 {
-	for (auto& observer : mScannerObservers)
+	if (mScannerObservers.empty() == false)
 	{
-		
+		for (auto& observer : mScannerObservers)
+		{
+
+		}
 	}
 }
 

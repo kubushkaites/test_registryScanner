@@ -6,7 +6,7 @@ class ScannerRingZero : public IScanner
 {
 public:
 	ScannerRingZero(const std::wstring& scanningStartPath, const std::wstring& searchPattern = L"");//use default value for making possible just iterate through all the registry also);
-	virtual void startScanning() override;
+	virtual bool startScanning() override;
 	virtual void stopScanning() override;
 	virtual void changeScanningStartPath(std::wstring scanningStartPath) override;
 	virtual void addScannerObserver(IScanningResultObserverSharedPtr scannerObserver) override;

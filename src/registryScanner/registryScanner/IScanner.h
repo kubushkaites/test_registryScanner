@@ -12,7 +12,7 @@ typedef std::shared_ptr<ScannerProgressStrategy> ScannerProgressStrategySharedPt
 class IScanner
 {
 public:
-	virtual void startScanning() = 0;
+	virtual bool startScanning() = 0; 
 	virtual void stopScanning() = 0;
 	virtual void changeScanningStartPath(std::wstring scanningStartPath) = 0;
 	virtual void addScannerObserver(IScanningResultObserverSharedPtr scannerObserver) = 0;
